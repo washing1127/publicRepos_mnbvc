@@ -109,7 +109,7 @@ def main():
 if __name__ == '__main__':
     global GITEE_AK, GITHUB_AK
     global log_file
-    GITHUB_AK = "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"
-    GITEE_AK = "4dfd733af8dd6138e59728fa4f33ff55"
+    GITHUB_AK = ""
+    GITEE_AK = ""
     log_file = "./.log"
     main()
