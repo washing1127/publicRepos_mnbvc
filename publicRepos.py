@@ -1,116 +1,115 @@
+import os
+import json
 import requests
 import argparse
-
-GITHUB_AK = ""
-GITEE_AK = ""
+import traceback
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="根据参数，获取GitHub/Gitee的所有/某个时间段/今天的所有开源仓库信息"
+        description="获取 GitHub/Gitee 中所有用户的所有开源仓库信息"
     )
     parser.add_argument(
         '-p', '--platform',
         required=True,
-        help='指定要爬取的平台，GitHub（github）或者Gitee（gitee）'
+        help='指定要爬取的平台，GitHub 或 Gitee'
     )
     parser.add_argument(
-        '-s', '--starttime',
-        help='指定要爬取的仓库的最早创建时间范围，比如（20000101）'
+        '--new',
+        default=False,
+        action="store_true",
+        help='是否完全从头零开始爬取所有信息, 默认为 False'
     )
-    parser.add_argument(
-        '-e', '--endtime',
-        help='指定要爬取的仓库的最晚创建时间范围，比如（20220202）'
-    )
-    parser.add_argument(
-        '-l', '--limit',
-        type=int,
-        default=0,
-        help='限制爬取的页数，默认为0，表示不限制'
-    )
-
     return parser.parse_args()
 
-class GitSpider():
-    def __init__(self) -> None:
-        self.base_url = ""
-        self.crawl_url = ""
-        self.ak = ""
-        self.param = {}
-        self.page_limit = 0
+def github_run():
+    repository_id = log_data[platform].get("repository_id", 0)
+    url = "https://api.github.com/repositories"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": "Bearer " + GITHUB_AK,
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    while True:
+        params = {
+            "since": repository_id,
+        }
+        resp = requests.get(url, headers=headers, params=params)
+        json_list = resp.json()
+        for item in json_list:
+            try:
+                if "url" in item.keys():
+                    url = item['url']
+                    resp2 = requests.get(url, headers=headers)
+                    repos = resp2.json()
+                    with open(save_file, "a", encoding="utf-8")as a:
+                        a.write(resp2.text + "\n")
+                    log_data[platform]['repository_id'] = max(repos['id'], repository_id)
+                    with open(log_file,'w',encoding='utf-8')as w:
+                        w.write(json.dumps(log_data, ensure_ascii=False))
+                    print(
+                        "Crawled a repository:\n"
+                        f"\tID: {repos['id']}\n"
+                        f"\tREPOSITORY NAME: {repos['name']}\n"
+                        f"\tOWNER: {repos['owner'].get('login', '')}"
+                    )
+            except :
+                print("===========================")
+                traceback.print_exc()
+                print("===========================")
+                print(type(item))
+                print("===========================")
+                print(item)
 
-    def save_repos(self, repo_list=None):
-        if not repo_list: repo_list = list()
-        for repo in repo_list:
-            print(repo['name'], repo['created_at'])
-        print(repo.keys())
-
-    def get_one_page(self):
-        resp = requests.get(self.crawl_url, params=self.param)
-        repo_list = resp.json()
-        self.save_repos(repo_list)
-        if 'next' in resp.links:
-            self.crawl_url = resp['next']['url']
-            return True
-        return False
-
-    def run(self):
-        while self.page_limit != 0:
-            self.page_limit = max(0, self.page_limit-1)
-            has_more = self.get_one_page()
-            if not has_more: break
-
-class GitHub(GitSpider):
-    def __init__(self, st, et) -> None:
-        super().__init__()
-        self.url = 'https://api.github.com/repositories'
-        self.param['per_page'] = 100
-        if st: self.param['']
-                
+def gitee_run():
+    # page_num = log_data[platform].get("page_num", 1)
+    # url = "https://gitee.com/api/v5/user/repos"
+    # headers = {
+    #     "Content-Type": "application/json",
+    #     "charset": "UTF-8",
+    # }
+    # while True:
+    #     params = {
+    #         "access_token": GITEE_AK,
+    #         "visibility": "public",  # 只爬取公开的仓库
+    #         "sort": "created",       # 按照创建时间排序
+    #         "direction": "asc",      # 增序，及越早越靠前
+    #         "page": page_num,
+    #         "per_page": 100,
+    #     }
+    #     resp = requests.get(url, headers=headers, params=params)
+    #     json_list = resp.json()
+    print("Gitee is not OK yet.")
+        
 
 
-
-class Gitee(GitSpider):
-    pass
-
-if __name__ == "__main__":
+def main():
+    global platform, save_file, log_data
     args = parse_args()
-    platform = args.platform
-    start_time = args.starttime
-    end_time = args.endtime
-    page_limit = args.limit
-    print(platform)
-    print(start_time)
-    print(end_time)
-    print(page_limit)
+    platform = args.platform.lower()
+    from_new = args.new
+    save_file = platform + "-repositories.txt"
+    if not os.path.exists(log_file):
+        log_data = {
+            'github': dict(),
+            'gitee': dict(),
+        }
+    else:
+        with open(log_file,"r",encoding="utf-8")as r:
+            log_data = json.loads(r.read())
+        if from_new is True:
+            os.unlink(save_file)
+            log_data[platform] = dict()
+    if platform == 'github':
+        github_run()
+    elif platform == 'gitee':
+        gitee_run()
+    else:
+        raise ValueError(f"没有找到 {platform} 对应的爬虫")
 
-
-
-
-# # Set the API endpoint
-# url = 'https://api.github.com/repositories'
-
-# # Set the headers for the request
-# headers = {'Authorization': 'Bearer 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'}
-
-# params = {"per_page": 100}
-# repos = []
-
-# while True:
-#     response = requests.get(url, params=params)
-#     if response.status_code == 200:
-#         repos.extend(response.json())
-#         # Check if there are more pages to retrieve
-#         if "next" in response.links:
-#             url = response.links["next"]["url"]
-#         else:
-#             break
-#     else:
-#         print("Failed to retrieve public repositories. Status code:", response.status_code)
-#         break
-#     break
-
-# for repo in repos:
-#     print(repo["name"])
-
-
-# if __name__ == "__main__":
+if __name__ == '__main__':
+    global GITEE_AK, GITHUB_AK
+    global log_file
+    GITHUB_AK = "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"
+    GITEE_AK = "4dfd733af8dd6138e59728fa4f33ff55"
+    log_file = "./.log"
+    main()
