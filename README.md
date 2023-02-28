@@ -38,13 +38,13 @@ pip install requests
 ### 输出介绍
 
 - `(github/gitee)-repositories.txt`
-    - github/gitee 的仓库信息，以行为单位，每一行是一个仓库
+    - github/gitee 的仓库信息，以行为单位，每一行是一个仓库，json 格式
 - `(github/gitee)-error_repositories.txt`
     - 请求无法获取正确范围的仓库，以行为单位，由 `\t` 连接。分别为
-        1. 仓库信息 API 地址
-        2. 请求得到的响应的状态码
-        3. 请求得到的相应数据
-        4. 请求来源的 item 信息
+        1. 仓库信息 API 地址（url）
+        2. 请求得到的响应的状态码（number）
+        3. 请求得到的相应数据（json）
+        4. 请求来源的 item 信息（json）
 
 ### 运行代码
 
