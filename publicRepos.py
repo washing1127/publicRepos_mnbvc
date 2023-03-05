@@ -23,6 +23,16 @@ def parse_args():
     )
     return parser.parse_args()
 
+def crawl_github(params):
+    url = "https://api.github.com/repositories"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        # "Authorization": "Bearer " + GITHUB_AK,
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    resp = requests.get(url, params=params, headers=headers)
+    
+
 def github_run():
     repository_id = log_data[platform].get("repository_id", 0)
     url = "https://api.github.com/repositories"
