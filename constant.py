@@ -1,10 +1,5 @@
 # GITHUB_TOKENS: github 的 token，list
-GITHUB_TOKENS = [
-    # "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",
-    # "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",
-    # "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",
-    "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",
-]
+GITHUB_TOKENS = []
 
 # GITEE_TOKENS: gitee 的 token，list
 # GITEE_TOKENS = [
