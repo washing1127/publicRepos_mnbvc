@@ -1,15 +1,11 @@
 # GITHUB_TOKENS: github 的 token，list
 GITHUB_TOKENS = [
-    # "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",
-    # "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",
-    # "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",
-    "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",
+    "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",
 ]
 
-# GITEE_TOKENS: gitee 的 token，list
-# GITEE_TOKENS = [
-#     "",
-# ]
+# 爬取的仓库 id 区间，[START, END)
+START = 999900
+END =  1000100
 
 # THREADS_NUM: 线程数，int
 THREADS_NUM = 1
@@ -26,8 +22,8 @@ LOG_FILE = "./.log"
 # logging 相关配置，用来记录错误信息，object
 import logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.ERROR,
     format='%(asctime)s %(filename)s %(levelname)s %(message)s',
     datefmt='%a %d %b %Y %H:%M:%S',
-    filename='crawl_log.log',
+    filename='err_log.log',
 )

@@ -37,9 +37,10 @@ pip install requests
 
 ### 输出介绍
 
-- `(github/gitee)-repositories.txt`
-    - github/gitee 的仓库信息，以行为单位，每一行是一个仓库，json 格式
-- `(github/gitee)-error_repositories.txt`
+- `num1-num2`
+    - github 的仓库信息，以行为单位，每一行是一个仓库，json 格式
+    - 文件名是其中包含的仓库的最小 id 和最大 id
+- `num1-num2_error`
     - 请求无法获取正确范围的仓库，以行为单位，由 `\t` 连接。分别为
         1. 仓库信息 API 地址（url）
         2. 请求得到的响应的状态码（number）
@@ -49,4 +50,5 @@ pip install requests
 ### 运行代码
 
 1. 将获取到的 AK 填入 `constant.py` 文件对应位置
-2. 运行代码： `python publicRepos.py -p github`
+2. 将要爬取的范围填入 `constant.py`，若其中有区间此前爬过，但未爬完，会选择续爬此前的记录，防止有遗漏
+3. 运行代码： `python publicRepos.py`
