@@ -10,15 +10,17 @@ from queue import Queue
 import argparse
 import requests
 import jsonlines
+import time
 
 # TOKEN_FREQUENCY: 一个 token 最短请求间隔，秒，int
 TOKEN_FREQUENCY = 1
 
 # RETRY_TIME: 当一个仓库详情获取失败时，重试的次数，int
-RETRY_TIME = 3
+RETRY_TIME = 10
 
 # GITHUB_TOKENS: github 的 token，list
 GITHUB_TOKENS = []
+
 
 class CrawlThread(threading.Thread):
     def __init__(self, queue, crawler, tid):
@@ -58,7 +60,7 @@ def github_repos_crawler(item, thread_name, retry_times=0):
                 a.write(
                     f"URL: {url}\tSTATUS CODE: {resp.status_code}\tRESPONSE DATA: {resp.text}\tINTACT ITEM: {json.dumps(item, ensure_ascii=False)}\n")
         else:
-            with jsonlines.open(find_range(repository_id) + '.jsonl', mode = 'a') as repo_meta_file:
+            with jsonlines.open(find_range(repository_id) + '.jsonl', mode='a') as repo_meta_file:
                 repo_meta_file.write(resp.text)
             repos = resp.json()
             if repos['id'] > repository_id:
@@ -118,26 +120,25 @@ def github_run(start, end, threads_num):
             print(json_list)
             print("=" * 50)
             print("获取失败")
-            sys.exit(1)
-        queue = Queue()
-        for item in json_list:
-            if isinstance(item, dict) and "url" in item.keys():
-                iid = item['id']
-                queue.put(item)
-
-        for tid in range(threads_num):
-            thread = CrawlThread(queue, github_repos_crawler, tid + 1)
-            thread.daemon = True
-            thread.start()
-
-        queue.join()
+            time.sleep(60)
+        else:
+            queue = Queue()
+            for item in json_list:
+                if isinstance(item, dict) and "url" in item.keys():
+                    iid = item['id']
+                    queue.put(item)
+            for tid in range(threads_num):
+                thread = CrawlThread(queue, github_repos_crawler, tid + 1)
+                thread.daemon = True
+                thread.start()
+            queue.join()
 
 
 def gitee_run():
     print("骚瑞 ~ Gitee is not OK yet.")
 
 
-def main(platform, github_tokens_file, start, end, threads_num,  log_file):
+def main(platform, github_tokens_file, start, end, threads_num, log_file):
     # 设置日志
     logging.basicConfig(
         level=logging.DEBUG,
