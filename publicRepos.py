@@ -113,25 +113,29 @@ def github_run(start, end, threads_num):
         params = {
             "since": repository_id,
         }
-        resp = requests.get(url, headers=new_headers(), params=params)  # 获取 100 个仓库的简要信息
-        json_list = resp.json()
-        if not isinstance(json_list, list):
-            print("=" * 50)
-            print(json_list)
-            print("=" * 50)
-            print("获取失败")
-            time.sleep(60)
-        else:
-            queue = Queue()
-            for item in json_list:
-                if isinstance(item, dict) and "url" in item.keys():
-                    iid = item['id']
-                    queue.put(item)
-            for tid in range(threads_num):
-                thread = CrawlThread(queue, github_repos_crawler, tid + 1)
-                thread.daemon = True
-                thread.start()
-            queue.join()
+        try:
+            resp = requests.get(url, headers=new_headers(), params=params)  # 获取 100 个仓库的简要信息
+            json_list = resp.json()
+            if not isinstance(json_list, list):
+                print("=" * 50)
+                print(json_list)
+                print("=" * 50)
+                print("获取失败")
+                time.sleep(60)
+            else:
+                queue = Queue()
+                for item in json_list:
+                    if isinstance(item, dict) and "url" in item.keys():
+                        iid = item['id']
+                        queue.put(item)
+                for tid in range(threads_num):
+                    thread = CrawlThread(queue, github_repos_crawler, tid + 1)
+                    thread.daemon = True
+                    thread.start()
+                queue.join()
+        except Exception as e:
+            print(e)
+            time.sleep(600)
 
 
 def gitee_run():
