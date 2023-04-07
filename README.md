@@ -26,7 +26,10 @@ pip install requests
 ### 参数介绍
 
 - `-p/--platform`: 指定要爬取的平台，GitHub 或 Gitee（Gitee 暂未完成）
-- `--new`: 是否完全从头开始爬取所有信息，默认为 `False`
+- `--github_tokens_file`: 用以保存 github tokens 的文件路径
+- `--start`: 开始爬取的仓库 id，默认为 1
+- `--end`: 爬取截止的仓库 id，默认为 100 万
+- `--log_file`: 代码运行的 log
 
 ### 爬取逻辑
 
@@ -46,9 +49,10 @@ pip install requests
         2. 请求得到的响应的状态码（number）
         3. 请求得到的相应数据（json）
         4. 请求来源的 item 信息（json）
+- `num1-num2_done`
+    - 保存爬取过的仓库 id，防止重复爬取
 
 ### 运行代码
 
-1. 将获取到的 AK 填入 `constant.py` 文件对应位置
-2. 将要爬取的范围填入 `constant.py`，若其中有区间此前爬过，但未爬完，会选择续爬此前的记录，防止有遗漏
-3. 运行代码： `python publicRepos.py`
+1. 将获取到的 AK 保存为一个 github tokens 文件，不同 AK 按行分割
+2. 运行代码： `python publicRepos.py`
