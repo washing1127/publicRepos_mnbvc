@@ -10,6 +10,8 @@ import argparse
 import requests
 import jsonlines
 import time
+import datetime
+
 
 # TOKEN_FREQUENCY: 一个 token 最短请求间隔，秒，int
 TOKEN_FREQUENCY = 1
@@ -76,9 +78,11 @@ def github_repos_crawler(item, retry_times=0):
             )
             done(iid)
         elif resp.status_code != 200:  # 其他错误响应码情况，记录到 error 里
+            now = datetime.datetime.now()
+            current_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
             with open(find_range(iid) + '_error', 'a', encoding='utf-8')as a:
                 a.write(
-                    f"URL: {url}\tSTATUS CODE: {resp.status_code}\tRESPONSE DATA: {resp.text}\tINTACT ITEM: {json.dumps(item, ensure_ascii=False)}\n")
+                    f"{current_time_str} URL: {url}\tSTATUS CODE: {resp.status_code}\tRESPONSE DATA: {resp.text}\tINTACT ITEM: {json.dumps(item, ensure_ascii=False)}\n")
         else:
             with jsonlines.open(find_range(iid) + '.jsonl', mode='a') as repo_meta_file:
                 repo_meta_file.write(resp.text)
