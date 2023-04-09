@@ -143,7 +143,7 @@ def github_run(start, end):
                 print(json_list)
                 print("=" * 50)
                 print("仓库列表获取失败")
-                time.sleep(60)
+                time.sleep(5)
             else:
                 for item in json_list:
                     if isinstance(item, dict) and "url" in item.keys() and "id" in item.keys():
@@ -153,7 +153,7 @@ def github_run(start, end):
                             github_repos_crawler(item)
         except Exception as e:
             print(e)
-            time.sleep(600)
+            time.sleep(5)
 
 
 def gitee_run():
